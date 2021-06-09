@@ -34,29 +34,22 @@ class MainInterface:
                 "ID": int,
                 "name": str,
                 "age": int
+            },
+            {
+                "tableID": 1,
+                "ID": int,
+                "name": str,
+                "age": int
+            },
+            {
+                "tableID": 2,
+                "ID": int,
+                "name": str,
+                "age": int
             }
         ]
 
-    def handleAddRecord(self, inputWindow, database):
-        for (key, value) in self.entries.items():
-            if "tableID" in key:
-                continue
-            database[key].append(value.get())
-        inputWindow.destroy()
-        self.entries = {}
-        self.createMainInterface()
-
-    def handleDeleteRecord(self, inputWindow, entry, database):
-        for key in database.keys():
-            if "tableID" in key:
-                continue
-            database[key].pop(int(entry.get()))
-        inputWindow.destroy()
-        self.createMainInterface()
-
-    def addRowToTable(self, database):
-        inputWindow = Toplevel(self.root)
-
+    def createEntries(self, inputWindow, database):
         for index, (key) in enumerate(database.keys()):
             if "tableID" in key:
                 continue
@@ -65,6 +58,46 @@ class MainInterface:
             entry.grid(row=index, column=1)
             self.entries[key] = entry
 
+    def handleAddRecord(self, inputWindow, database):
+        for (key, value) in self.entries.items():
+            if "tableID" in key:
+                continue
+            types = next(
+                x for x in self.dataTypes if x['tableID'] == database["tableID"])
+            try:
+                result = types[key](value.get())
+            except ValueError:
+                Label(inputWindow, text=f"{value.get()} is not the correct type").grid(
+                    row=len(database.items()) + 2, column=0)
+                self.entries = {}
+                self.createEntries(inputWindow, database)
+                return
+            database[key].append(result)
+        inputWindow.destroy()
+        self.entries = {}
+        self.createMainInterface()
+
+    def handleDeleteRecord(self, inputWindow, entry, database):
+        try:
+            rowID = int(entry.get())
+        except ValueError:
+            Label(inputWindow, text=f"{entry.get()} is not integer").grid(
+                row=len(database.items()) + 2, column=0)
+            return
+        for key in database.keys():
+            if "tableID" in key:
+                continue
+            if rowID > len(database[key]):
+                Label(inputWindow, text=f"{rowID} doesn't exist").grid(
+                    row=len(database.items()) + 2, column=0)
+                return
+            database[key].pop(rowID)
+        inputWindow.destroy()
+        self.createMainInterface()
+
+    def addRowToTable(self, database):
+        inputWindow = Toplevel(self.root)
+        self.createEntries(inputWindow, database)
         inputBtn = Button(inputWindow, text='Submit Data',
                           command=lambda: self.handleAddRecord(inputWindow, database))
         inputBtn.grid(row=len(database.items()) + 1, column=0)
@@ -72,7 +105,8 @@ class MainInterface:
     def removeRowToTable(self, database):
         inputWindow = Toplevel(self.root)
 
-        Label(inputWindow, text="Row ID").grid(row=1, column=0)
+        Label(inputWindow, text="Enter The index of a row to delete:").grid(
+            row=1, column=0)
         entry = Entry(inputWindow, bd=5)
         entry.grid(row=2, column=1)
 
