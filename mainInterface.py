@@ -5,8 +5,14 @@ from tkinter import ttk
 class MainInterface:
     def __init__(self, root) -> None:
         self.root = root
-        self.entries = []
+        self.entries = {}
         self.databases = [
+            {
+                "tableID": 0,
+                "ID": [23, 5, 25, 2, 9],
+                "name": ["Artur", "Pavel", "Vlad", "Stot", "wfw"],
+                "age": [22, 31, 54, 44, 10]
+            },
             {
                 "tableID": 1,
                 "ID": [23, 5, 25, 2, 9],
@@ -17,30 +23,62 @@ class MainInterface:
                 "tableID": 2,
                 "ID": [23, 5, 25, 2, 9],
                 "name": ["Artur", "Pavel", "Vlad", "Stot", "wfw"],
-                "age": [22, 31, 54, 44, 10]
-            },
-            {
-                "tableID": 3,
-                "ID": [23, 5, 25, 2, 9],
-                "name": ["Artur", "Pavel", "Vlad", "Stot", "wfw"],
-                "age": [22, 31, 54, 44, 10]
+                "age": [22, 31, 54, 44, 10],
+                "login":["Artur", "Pavel", "Vlad", "Stot", "wfw"],
             }
         ]
         self.dataToInsert = []
         self.dataTypes = [
             {
-                "tableID": 1,
+                "tableID": 0,
                 "ID": int,
                 "name": str,
                 "age": int
             }
         ]
 
+    def handleAddRecord(self, inputWindow, database):
+        for (key, value) in self.entries.items():
+            if "tableID" in key:
+                continue
+            database[key].append(value.get())
+        inputWindow.destroy()
+        self.entries = {}
+        self.createMainInterface()
+
+    def handleDeleteRecord(self, inputWindow, entry, database):
+        for key in database.keys():
+            if "tableID" in key:
+                continue
+            database[key].pop(int(entry.get()))
+        inputWindow.destroy()
+        self.createMainInterface()
+
     def addRowToTable(self, database):
-        pass
+        inputWindow = Toplevel(self.root)
+
+        for index, (key) in enumerate(database.keys()):
+            if "tableID" in key:
+                continue
+            Label(inputWindow, text=key).grid(row=index, column=0)
+            entry = Entry(inputWindow, bd=5)
+            entry.grid(row=index, column=1)
+            self.entries[key] = entry
+
+        inputBtn = Button(inputWindow, text='Submit Data',
+                          command=lambda: self.handleAddRecord(inputWindow, database))
+        inputBtn.grid(row=len(database.items()) + 1, column=0)
 
     def removeRowToTable(self, database):
-        pass
+        inputWindow = Toplevel(self.root)
+
+        Label(inputWindow, text="Row ID").grid(row=1, column=0)
+        entry = Entry(inputWindow, bd=5)
+        entry.grid(row=2, column=1)
+
+        inputBtn = Button(inputWindow, text='Submit Data',
+                          command=lambda: self.handleDeleteRecord(inputWindow, entry, database))
+        inputBtn.grid(row=len(database.items()) + 1, column=0)
 
     def createMainInterface(self):
         self.root.title("Database Client")
