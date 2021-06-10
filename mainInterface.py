@@ -54,7 +54,7 @@ class MainInterface:
             if "tableID" in key:
                 continue
             Label(inputWindow, text=key).grid(row=index, column=0)
-            entry = Entry(inputWindow, bd=5)
+            entry = Entry(inputWindow)
             entry.grid(row=index, column=1)
             self.entries[key] = entry
 
@@ -63,15 +63,19 @@ class MainInterface:
             if "tableID" in key:
                 continue
             types = next(
-                x for x in self.dataTypes if x['tableID'] == database["tableID"])
+                x for x in self.dataTypes if x["tableID"] == database["tableID"])
             try:
-                result = types[key](value.get())
+                types[key](value.get())
             except ValueError:
-                Label(inputWindow, text=f"{value.get()} is not the correct type").grid(
-                    row=len(database.items()) + 2, column=0)
                 self.entries = {}
                 self.createEntries(inputWindow, database)
+                Label(inputWindow, text=f"{value.get()} is not the correct type").grid(
+                    row=len(database.items()) + 2, column=0)
                 return
+        for (key, value) in self.entries.items():
+            if "tableID" in key:
+                continue
+            result = types[key](value.get())
             database[key].append(result)
         inputWindow.destroy()
         self.entries = {}
@@ -105,14 +109,21 @@ class MainInterface:
     def removeRowToTable(self, database):
         inputWindow = Toplevel(self.root)
 
-        Label(inputWindow, text="Enter The index of a row to delete:").grid(
+        Label(inputWindow, text="Enter the index of a row to delete:").grid(
             row=1, column=0)
         entry = Entry(inputWindow, bd=5)
         entry.grid(row=2, column=1)
 
-        inputBtn = Button(inputWindow, text='Submit Data',
+        inputBtn = Button(inputWindow, text="Submit Data",
                           command=lambda: self.handleDeleteRecord(inputWindow, entry, database))
         inputBtn.grid(row=len(database.items()) + 1, column=0)
+
+    def addTable(self):
+        inputWindow = Toplevel(self.root)
+
+        inputBtn = Button(inputWindow, text='Submit Data',
+                          command=lambda: self.handleAddRecord(inputWindow))
+        inputBtn.grid(row=0, column=2)
 
     def createMainInterface(self):
         self.root.title("Database Client")
@@ -122,6 +133,8 @@ class MainInterface:
         if len(self.databases) == 0:
             Label(self.root, text='No available tables', font='Helvetica 14 bold').grid(
                 row=1, column=1, sticky="nsew", pady=10)
+            Button(self.root, text='Add Table', font='Helvetica 14',
+                   command=self.addTable).grid(row=2, column=0)
 
         for i in range(len(self.databases)):
             items = list(self.databases[i].keys())
