@@ -13,6 +13,6 @@ if __name__ == "__main__":
     root = Tk()
     ox = root.winfo_screenwidth() / 2
     oy = root.winfo_screenheight() / 2
-    root.geometry(f'+{int(ox - 400)}+{int(oy - 345)}')
+    root.geometry(f'+{int(ox - 550)}+{int(oy - 400)}')
     apk = Application(root)
     root.mainloop()
