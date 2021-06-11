@@ -3,9 +3,10 @@ from tkinter import ttk
 
 
 class MainInterface:
-    def __init__(self, root) -> None:
+    def __init__(self, root):
         self.root = root
         self.entries = {}
+        self.warningLabels = []
         self.databases = [
             {
                 "ID": [23, 5, 25, 2, 9],
@@ -31,15 +32,21 @@ class MainInterface:
         }
 
     def createEntries(self, inputWindow, database):
+        """
+            This funciton creates entries in a window to add row values to insert into a table.
+        """
         for index, (key) in enumerate(database.keys()):
             if "tableID" in key or "tableName" in key:
                 continue
-            Label(inputWindow, text=key).grid(row=index, column=0)
+            Label(inputWindow, text=key).grid(row=index, column=0, padx=5)
             entry = Entry(inputWindow)
-            entry.grid(row=index, column=1)
+            entry.grid(row=index, column=1, padx=5)
             self.entries[key] = entry
 
     def handleAddRecord(self, inputWindow, database):
+        """
+            This function adds rows to a selected database from self.database and also verifies if the type is correct.
+        """
         for (key, value) in self.entries.items():
             if "tableID" in key or "tableName" in key:
                 continue
@@ -63,6 +70,9 @@ class MainInterface:
         self.createMainInterface()
 
     def handleDeleteRecord(self, inputWindow, entry, database):
+        """
+            This function deletes row using an index from a selected database from self.database and also verifies if the index is exists.
+        """
         try:
             rowID = int(entry.get())
         except ValueError:
@@ -80,30 +90,59 @@ class MainInterface:
         inputWindow.destroy()
         self.createMainInterface()
 
-    def addRowToTable(self, database):
+    def verifyDeleteRow(self, inputWindow, entry, database):
+        """
+            This function verifies if the user intended to delete the row.
+        """
+        verificationWindow = Toplevel(inputWindow)
+        Label(verificationWindow, text=f"Do you want to row with index {entry.get()}?").grid(
+            row=0, column=0)
+
+        yesBtn = Button(verificationWindow, text="Yes",
+                        command=lambda: (self.handleDeleteRecord(inputWindow, entry, database), verificationWindow.destroy()))
+        yesBtn.grid(row=1, column=0)
+        noBtn = Button(verificationWindow, text="No",
+                       command=verificationWindow.destroy)
+        noBtn.grid(row=1, column=1)
+
+    def addTableRow(self, database):
+        """
+            This function adds a row to a selected table from self.databases.
+        """
         inputWindow = Toplevel(self.root)
         self.createEntries(inputWindow, database)
-        inputBtn = Button(inputWindow, text='Submit Data',
+        inputBtn = Button(inputWindow, text="Submit Data",
                           command=lambda: self.handleAddRecord(inputWindow, database))
-        inputBtn.grid(row=len(database.items()) + 1, column=0)
+        inputBtn.grid(row=len(database.items()) + 1,
+                      column=0, columnspan=2, pady=10)
 
-    def removeRowToTable(self, database):
+    def deleteTableRow(self, database):
+        """
+            This function creates window to enter row index and on button click verifies if user intended to delete a row.
+        """
         inputWindow = Toplevel(self.root)
 
         Label(inputWindow, text="Enter the index of a row to delete:").grid(
-            row=1, column=0)
+            row=1, column=0, padx=15, pady=10)
         entry = Entry(inputWindow)
-        entry.grid(row=2, column=1)
+        entry.grid(row=1, column=1, padx=15, pady=10)
 
         inputBtn = Button(inputWindow, text="Submit Data",
-                          command=lambda: self.handleDeleteRecord(inputWindow, entry, database))
-        inputBtn.grid(row=len(database.items()) + 1, column=0)
+                          command=lambda: self.verifyDeleteRow(inputWindow, entry, database))
+        inputBtn.grid(row=len(database.items()), column=0,
+                      columnspan=2, padx=15, pady=5)
 
     def addEntryBox(self, inputWindow, addRowBtn, submitBtn):
-        nextRow = len(self.entries) + 1
+        """
+            This function creates window to enter row index and on button click verifies if user intended to delete a row.
+        """
+        nextRow = len(self.entries) + 3
+
+        for item in self.warningLabels:
+            item.destroy()
 
         entry = Entry(inputWindow)
-        entry.grid(row=nextRow, column=0)
+        entry.grid(row=nextRow, column=0, padx=15)
         variable = StringVar(inputWindow)
         textTypes = list(self.availableTypes.keys())
         variable.set(textTypes[0])
@@ -115,10 +154,22 @@ class MainInterface:
         self.entries[entry] = variable
 
     def handleAddTable(self, inputWindow, tableName):
+        """
+            This function adds table to a database from self.database and also verifies if every entry is populated.
+        """
+        if not tableName.get().strip():
+            label = Label(inputWindow, text="Name of table cannot be empty!")
+            label.grid(
+                row=len(self.entries) + 6, column=0, columnspan=2, pady=10, padx=10)
+            self.warningLabels.append(label)
+            return
         for item in self.entries.keys():
-            if not item.get():
-                Label(inputWindow, text="Name of column cannot be empty!").grid(
-                    row=len(self.entries) + 5, column=0, columnspan=2, pady=10, padx=10)
+            if not item.get().strip():
+                label = Label(
+                    inputWindow, text="Name of column cannot be empty!")
+                label.grid(
+                    row=len(self.entries) + 6, column=0, columnspan=2, pady=10, padx=10)
+                self.warningLabels.append(label)
                 return
 
         result = {key.get(): self.availableTypes[value.get()] for
@@ -143,50 +194,81 @@ class MainInterface:
         self.createMainInterface()
 
     def addTable(self):
+        """
+            This function gives user entries to create table. Table can be of an unlimited size.
+        """
         inputWindow = Toplevel(self.root)
 
-        Label(inputWindow, text="Enter column name and select it's type:").grid(
-            row=0, column=0, columnspan=2, pady=10, padx=10)
-
         Label(inputWindow, text="Enter table name:").grid(
-            row=1, column=0, columnspan=2, pady=10, padx=10)
+            row=0, column=0, columnspan=2)
 
         tableName = Entry(inputWindow)
-        tableName.grid(row=1, column=1)
+        tableName.grid(row=1, column=0, columnspan=2)
 
-        submitBtn = Button(inputWindow, text='Submit Data',
+        Label(inputWindow, text="Enter column name and select it's type:").grid(
+            row=2, column=0, columnspan=2, pady=10, padx=10)
+
+        submitBtn = Button(inputWindow, text="Submit Data",
                            command=lambda: self.handleAddTable(inputWindow, tableName))
-        addRowBtn = Button(inputWindow, text='Add Column',
+        addRowBtn = Button(inputWindow, text="Add Column",
                            command=lambda: self.addEntryBox(inputWindow, addRowBtn, submitBtn))
-        addRowBtn.grid(row=len(self.entries) + 2,
+        addRowBtn.grid(row=len(self.entries) + 3,
                        column=0, columnspan=2, pady=10)
+        self.addEntryBox(inputWindow, addRowBtn, submitBtn)
 
     def handleDeleteTable(self, inputWindow, entry):
+        """
+            This function deletes a table from database and also deletes it's data types. It also verifies in index is a nnumber and the table with this index exists.
+        """
         try:
             tableIndex = int(entry.get())
         except ValueError:
             Label(inputWindow, text=f"{entry.get()} is not integer").grid(
                 row=4, column=0)
             return
-
+        if tableIndex >= len(self.databases):
+            Label(inputWindow, text=f"{entry.get()} doesn't exist").grid(
+                row=4, column=0)
+            return
         self.databases.pop(tableIndex)
         self.dataTypes.pop(tableIndex)
         inputWindow.destroy()
         self.createMainInterface()
 
-    def removeTable(self):
+    def verifyDeleteTable(self, inputWindow, entry):
+        """
+            This function verifies if the user intended to delete the table.
+        """
+        verificationWindow = Toplevel(inputWindow)
+        Label(verificationWindow, text=f"Do you want to delete table with index {entry.get()}?").grid(
+            row=0, column=0)
+
+        yesBtn = Button(verificationWindow, text="Yes",
+                        command=lambda: (self.handleDeleteTable(inputWindow, entry), verificationWindow.destroy()))
+        yesBtn.grid(row=1, column=0)
+        noBtn = Button(verificationWindow, text="No",
+                       command=verificationWindow.destroy)
+        noBtn.grid(row=1, column=1)
+
+    def deleteTable(self):
+        """
+            This function creates window to enter table index and on button click verifies if user intended to delete a table.
+        """
         inputWindow = Toplevel(self.root)
 
         Label(inputWindow, text="Enter the index of a table to delete:").grid(
-            row=1, column=0)
+            row=1, column=0,  padx=15, pady=10)
         entry = Entry(inputWindow)
         entry.grid(row=2, column=1)
 
         inputBtn = Button(inputWindow, text="Submit Data",
-                          command=lambda: self.handleDeleteTable(inputWindow, entry))
-        inputBtn.grid(row=3, column=0)
+                          command=lambda: self.verifyDeleteTable(inputWindow, entry))
+        inputBtn.grid(row=2, column=0)
 
     def createMainInterface(self):
+        """
+            This is the main funciton of a program. It creates main view with TreeView and appends data to it. It adds buttons to manipulate tables and rows.
+        """
         self.root.title("Database Client")
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -224,9 +306,9 @@ class MainInterface:
             tableName = Label(
                 rowButtonsFrame, text=self.databases[i]["tableName"], font='Helvetica 14 bold')
             addRowButton = Button(rowButtonsFrame, text='Add Row', font='Helvetica 14',
-                                  command=lambda index=i: self.addRowToTable(self.databases[index]))
+                                  command=lambda index=i: self.addTableRow(self.databases[index]))
             removeRowButton = Button(rowButtonsFrame, text='Remove Row', font='Helvetica 14',
-                                     command=lambda index=i: self.removeRowToTable(self.databases[index]))
+                                     command=lambda index=i: self.deleteTableRow(self.databases[index]))
             rowButtonsFrame.grid(row=i + 1, column=len(self.databases[i]) - 1)
             tableName.grid(row=0, column=0)
             addRowButton.grid(row=1, column=0)
@@ -236,7 +318,7 @@ class MainInterface:
             addTableButton = Button(tableButtonsFrame, text='Add Table', font='Helvetica 14',
                                     command=self.addTable)
             removeTableButton = Button(tableButtonsFrame, text='Remove Table', font='Helvetica 14',
-                                       command=self.removeTable)
+                                       command=self.deleteTable)
             tableButtonsFrame.grid(row=len(self.databases) + 1, column=0, columnspan=max(
                 [len(item) for item in self.databases]) - 1)
             addTableButton.grid(row=0, column=0, pady=10)
