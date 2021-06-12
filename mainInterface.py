@@ -38,8 +38,7 @@ class MainInterface:
             types = next(
                 x for x in self.dataTypes if x["tableID"] == database["tableID"])
             try:
-                if not type(value.get()) == types[key]:
-                    raise ValueError
+                types[key](value.get())
             except ValueError:
                 self.entries = {}
                 self.createEntries(inputWindow, database)
