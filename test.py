@@ -2,14 +2,15 @@ from mainInterfaceTest import MainInterface
 from tkinter import *
 import unittest
 
+# Tested file is mainInterfaceTest, where all the .get() methods are removed and self.createMainInterface() methode is commented out. This way we can test the functionality of the program. Otherwise, code is the same.
+
 
 class TestProject(unittest.TestCase):
     root = Tk()
     interface = MainInterface(root)
 
-    # Before running tests remove all the .get() methods and comment out self.createMainInterface() method from tested function
-
     def test_00_AddTable(self):
+        """Tests if the add table functionality works correctly."""
         self.interface.entries = {
             "ID": "Integer",
             "name": "Text",
@@ -38,6 +39,7 @@ class TestProject(unittest.TestCase):
         self.assertDictEqual(resultDatabase, self.interface.databases[0])
 
     def test_01_AddTableRow(self):
+        """Tests if the add row functionality works correctly."""
         self.interface.entries = {
             "ID": 1,
             "name": "Roch",
@@ -59,6 +61,7 @@ class TestProject(unittest.TestCase):
         self.assertDictEqual(result, self.interface.databases[0])
 
     def test_02_AddTableRow(self):
+        """Tests if the add table functionality works correctly."""
         self.interface.entries = {
             "ID": 2,
             "name": "Ziemniaczyslaw",
@@ -80,6 +83,7 @@ class TestProject(unittest.TestCase):
         self.assertDictEqual(result, self.interface.databases[0])
 
     def test_03_AddIncorrectTableRow(self):
+        """Tests if the program checks the type of the data entred into database."""
         self.interface.entries = {
             "ID": "cztery",
             "name": "bla",
@@ -95,6 +99,7 @@ class TestProject(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_04_AddIncorrectTableRow(self):
+        """Tests if the program checks the type of the data entred into database."""
         self.interface.entries = {
             "ID": 3.14,
             "name": "pi",
@@ -111,6 +116,7 @@ class TestProject(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_05_AttemptToDeleteTableRow(self):
+        """Tests if the program verifies if the user intended to delete table row. This test rejects the deletion."""
         entry = 0
 
         inputWindow = Toplevel(self.root)
@@ -131,6 +137,7 @@ class TestProject(unittest.TestCase):
         self.assertDictEqual(result, self.interface.databases[0])
 
     def test_06_DeleteTableRow(self):
+        """Tests if the program verifies if the user intended to delete table row. This test accepts the deletion and deletes the row."""
         entry = 0
 
         inputWindow = Toplevel(self.root)
@@ -151,6 +158,7 @@ class TestProject(unittest.TestCase):
         self.assertDictEqual(result, self.interface.databases[0])
 
     def test_07_AddSecondTable(self):
+        """Tests if the add table functionality works correctly with several tables."""
         self.interface.entries = {
             "reserved": "Text",
             "color": "Integer",
@@ -174,6 +182,7 @@ class TestProject(unittest.TestCase):
         self.assertDictEqual(resultDatabase, self.interface.databases[1])
 
     def test_08_AddTableRow(self):
+        """Tests if the add row functionality works correctly with several tables."""
         self.interface.entries = {
             "reserved": "",
             "color": 1337,
@@ -191,6 +200,7 @@ class TestProject(unittest.TestCase):
         self.assertDictEqual(result, self.interface.databases[1])
 
     def test_09_AddIncorrectTableRow(self):
+        """Tests if the program checks the type of the data entred into database."""
         self.interface.entries = {
             "reserved": "bla",
             "color": "1939b",
@@ -205,6 +215,7 @@ class TestProject(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_10_DeleteTable(self):
+        """Tests if the program verifies if the user intended to delete table. This test rejects the deletion."""
         entry = 0
 
         inputWindow = Toplevel(self.root)
@@ -219,6 +230,7 @@ class TestProject(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_11_DeleteTable(self):
+        """Tests if the program verifies if the user intended to delete table. This test accepts the deletion and deletes the table."""
         entry = 0
 
         inputWindow = Toplevel(self.root)
@@ -233,6 +245,7 @@ class TestProject(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_12_AddTableWithIncorrectName(self):
+        """Tests if the program adds the table with empty name."""
         self.interface.entries = {
             "ID": "Integer",
             "login": "text"
@@ -245,6 +258,7 @@ class TestProject(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_13_AddTableWithNoName(self):
+        """Tests if the program adds the table with no name."""
         self.interface.entries = {
             "ID": "Integer",
             "login": "text"
@@ -257,6 +271,7 @@ class TestProject(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_14_AddTableWithNoColumnName(self):
+        """Tests if the program adds the table with empty or no column name."""
         self.interface.entries = {
             "": "Integer"
         }
