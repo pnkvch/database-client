@@ -38,31 +38,31 @@ class MainInterface:
             types = next(
                 x for x in self.dataTypes if x["tableID"] == database["tableID"])
             try:
-                if not type(value.get()) == types[key]:
+                if not type(value) == types[key]:
                     raise ValueError
             except ValueError:
                 self.entries = {}
                 self.createEntries(inputWindow, database)
-                Label(inputWindow, text=f"{value.get()} is not the correct type").grid(
+                Label(inputWindow, text=f"{value} is not the correct type").grid(
                     row=len(database.items()) + 2, column=0)
                 return
         for (key, value) in self.entries.items():
             if "tableID" in key or "tableName" in key:
                 continue
-            result = types[key](value.get())
+            result = types[key](value)
             database[key].append(result)
         inputWindow.destroy()
         self.entries = {}
-        self.createMainInterface()
+        # self.createMainInterface()
 
     def handleDeleteRecord(self, inputWindow, entry, database):
         """
             This function deletes row using an index from a selected database from self.database and also verifies if the index is exists.
         """
         try:
-            rowID = int(entry.get())
+            rowID = int(entry)
         except ValueError:
-            Label(inputWindow, text=f"{entry.get()} is not integer").grid(
+            Label(inputWindow, text=f"{entry} is not integer").grid(
                 row=len(database.items()) + 2, column=0)
             return
         for key in database.keys():
@@ -81,7 +81,7 @@ class MainInterface:
             This function verifies if the user intended to delete the row.
         """
         verificationWindow = Toplevel(inputWindow)
-        Label(verificationWindow, text=f"Do you want to row with index {entry.get()}?").grid(
+        Label(verificationWindow, text=f"Do you want to row with index {entry}?").grid(
             row=0, column=0)
 
         yesBtn = Button(verificationWindow, text="Yes",
@@ -143,14 +143,14 @@ class MainInterface:
         """
             This function adds table to a database from self.database and also verifies if every entry is populated.
         """
-        if not tableName.get().strip():
+        if not tableName.strip():
             label = Label(inputWindow, text="Name of table cannot be empty!")
             label.grid(
                 row=len(self.entries) + 6, column=0, columnspan=2, pady=10, padx=10)
             self.warningLabels.append(label)
             return
         for item in self.entries.keys():
-            if not item.get().strip():
+            if not item.strip():
                 label = Label(
                     inputWindow, text="Name of column cannot be empty!")
                 label.grid(
@@ -158,7 +158,7 @@ class MainInterface:
                 self.warningLabels.append(label)
                 return
 
-        result = {key.get(): self.availableTypes[value.get()] for
+        result = {key: self.availableTypes[value] for
                   key, value in self.entries.items()}
         ids = [item["tableID"] for item in self.databases]
         if not ids:
@@ -172,12 +172,12 @@ class MainInterface:
                 database[key] = value
                 continue
             database[key] = []
-        database["tableName"] = tableName.get()
+        database["tableName"] = tableName
         self.databases.append(database)
 
         self.entries = {}
         inputWindow.destroy()
-        self.createMainInterface()
+        # self.createMainInterface()
 
     def addTable(self):
         """
@@ -207,13 +207,13 @@ class MainInterface:
             This function deletes a table from database and also deletes it's data types. It also verifies in index is a nnumber and the table with this index exists.
         """
         try:
-            tableIndex = int(entry.get())
+            tableIndex = int(entry)
         except ValueError:
-            Label(inputWindow, text=f"{entry.get()} is not integer").grid(
+            Label(inputWindow, text=f"{entry} is not integer").grid(
                 row=4, column=0)
             return
         if tableIndex >= len(self.databases):
-            Label(inputWindow, text=f"{entry.get()} doesn't exist").grid(
+            Label(inputWindow, text=f"{entry} doesn't exist").grid(
                 row=4, column=0)
             return
         self.databases.pop(tableIndex)
@@ -226,7 +226,7 @@ class MainInterface:
             This function verifies if the user intended to delete the table.
         """
         verificationWindow = Toplevel(inputWindow)
-        Label(verificationWindow, text=f"Do you want to delete table with index {entry.get()}?").grid(
+        Label(verificationWindow, text=f"Do you want to delete table with index {entry}?").grid(
             row=0, column=0)
 
         yesBtn = Button(verificationWindow, text="Yes",
